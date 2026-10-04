@@ -1,5 +1,9 @@
 # dns_cache_async
 
+[![CI](https://github.com/shauligal3/dns_cache_async/actions/workflows/ci.yml/badge.svg)](https://github.com/shauligal3/dns_cache_async/actions/workflows/ci.yml)
+![C](https://img.shields.io/badge/C-C11-blue)
+![Dependencies](https://img.shields.io/badge/runtime%20dependencies-glibc%20only-brightgreen)
+
 Asynchronous DNS cache for a data path, as a C shared library (`libdnscache.so`).
 
 Data-path threads never block on DNS. A lookup either returns an address from

@@ -20,6 +20,11 @@ CFLAGS    ?= -O2 -g
 override CFLAGS += -std=c11 -Wall -Wextra -Wpedantic -Wshadow \
              -fPIC -fvisibility=hidden -Iinclude
 LDLIBS    := -lanl -lpthread
+# Fail the link if the library has unresolved symbols. Sanitizer builds turn
+# this off: clang links only a small static stub of the sanitizer runtime into
+# shared libraries and leaves __asan_*/__ubsan_* to be resolved from the
+# executable at load time.
+NO_UNDEFINED ?= -Wl,--no-undefined
 
 SRCS      := src/dns_cache.c src/timer_heap.c src/job_queue.c
 OBJS      := $(SRCS:src/%.c=$(BUILD)/obj/%.o)
@@ -38,7 +43,7 @@ $(BUILD)/obj/%.o: src/%.c include/dns_cache.h src/*.h | $(BUILD)/obj
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(SHLIB): $(OBJS)
-	$(CC) -shared -Wl,-soname,$(SONAME) -Wl,--no-undefined -o $@ $^ $(LDFLAGS) $(LDLIBS)
+	$(CC) -shared -Wl,-soname,$(SONAME) $(NO_UNDEFINED) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 	ln -sf lib$(NAME).so.$(VERSION) $(BUILD)/$(SONAME)
 	ln -sf $(SONAME) $(BUILD)/lib$(NAME).so
 
@@ -56,7 +61,7 @@ test: $(BUILD)/test_dns_cache
 
 asan:
 	$(MAKE) BUILD=build-asan CFLAGS="-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer" \
-	        LDFLAGS="-fsanitize=address,undefined" test
+	        LDFLAGS="-fsanitize=address,undefined" NO_UNDEFINED= test
 
 # ThreadSanitizer is not usable here: since glibc 2.34 getaddrinfo_a() starts
 # its worker threads through an internal pthread_create() that TSan does not

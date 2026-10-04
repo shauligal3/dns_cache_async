@@ -1,0 +1,18 @@
+# glibc resolver internals: per-thread resolv.conf copy and stacks of the
+# getaddrinfo_a() worker threads, which glibc keeps alive / never frees.
+{
+   glibc-resolv-conf
+   Memcheck:Leak
+   match-leak-kinds: definite,possible
+   ...
+   fun:__resolv_conf_allocate
+}
+{
+   glibc-gai-worker-stack
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:allocate_stack
+   ...
+   fun:pthread_create*
+}

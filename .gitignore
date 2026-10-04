@@ -1,0 +1,7 @@
+build/
+build-asan/
+*.o
+*.so
+*.so.*
+*.a
+vgcore.*
